@@ -39,12 +39,16 @@ typedef void* aes_context;
 // key and iv are assumed to be both 128bit thus 16 uint8_t's
 aes_context aes128_cbc_enc_start(const uint8_t* key, const void* iv);
 
+// prepare an encrypted to use for encrypting multiple blocks lateron.
+// key and iv are assumed to be both 256bit thus 32 uint8_t's
+aes_context aes256_cbc_enc_start(const uint8_t* key, const void* iv);
+
 // encrypt one or more blocks of 128bit data
 // data_len should be mod 16
-void aes128_cbc_enc_continue(const aes_context ctx, void* data, const uint16_t data_len);
+void aes_cbc_enc_continue(const aes_context ctx, void* data, const uint16_t data_len);
 
 // cleanup encryption context
-void aes128_cbc_enc_finish(const aes_context ctx);
+void aes_cbc_enc_finish(const aes_context ctx);
 
 // decrypt multiple blocks of 128bit data, data_len but be mod 16
 // key and iv are assumed to be both 128bit thus 16 uint8_t's

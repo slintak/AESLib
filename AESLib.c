@@ -73,26 +73,6 @@ aes_context aes128_cbc_enc_start(const uint8_t* key, const void* iv){
 	return (aes_context)ctx;
 }
 
-// encrypt one or more blocks of 128bit data
-// data_len should be mod 16
-void aes128_cbc_enc_continue(const aes_context ctx, void* data, const uint16_t data_len){
-	if (data_len % 16 != 0) {
-		return;
-	}
-	bcal_cbc_ctx_t* _ctx = (bcal_cbc_ctx_t*)ctx;
-	uint16_t msg_blocks = data_len / 16;
-	while(msg_blocks--){
-		bcal_cbc_encNext(data, _ctx);
-		data = (uint8_t*)data + _ctx->blocksize_B;
-	}
-}
-
-// cleanup encryption context
-void aes128_cbc_enc_finish(const aes_context ctx){
-	bcal_cbc_free((bcal_cbc_ctx_t*)ctx);
-	free(ctx);
-}
-
 // decrypt multiple blocks of 128bit data, data_len but be mod 16
 // key and iv are assumed to be both 128bit thus 16 uint8_t's
 void aes128_cbc_dec(const uint8_t* key, const uint8_t* iv, void* data, const uint16_t data_len){
@@ -162,3 +142,39 @@ void aes256_enc_single(const uint8_t* key, void* data){
     aes256_enc(data, &ctx);
 }
 
+// prepare an encrypted to use for encrypting multiple blocks lateron.
+// key has to be 256bit thus 32 uint8_t's and iv 128bit (16 uint8_t's)
+aes_context aes256_cbc_enc_start(const uint8_t* key, const void* iv){
+    bcal_cbc_ctx_t* ctx = (bcal_cbc_ctx_t*)malloc(sizeof(bcal_cbc_ctx_t));
+    uint8_t r = bcal_cbc_init(&aes256_desc, key, 256, ctx);
+    if (r) {
+        free(ctx);
+        return NULL;
+    }
+    bcal_cbc_loadIV(iv, ctx);
+    return (aes_context)ctx;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// AES functions for CBC mode
+////////////////////////////////////////////////////////////////////////////////
+
+// encrypt one or more blocks of 128bit data
+// data_len should be mod 16
+void aes_cbc_enc_continue(const aes_context ctx, void* data, const uint16_t data_len){
+    if (data_len % 16 != 0) {
+        return;
+    }
+    bcal_cbc_ctx_t* _ctx = (bcal_cbc_ctx_t*)ctx;
+    uint16_t msg_blocks = data_len / 16;
+    while(msg_blocks--){
+        bcal_cbc_encNext(data, _ctx);
+        data = (uint8_t*)data + _ctx->blocksize_B;
+    }
+}
+
+// cleanup encryption context
+void aes_cbc_enc_finish(const aes_context ctx){
+    bcal_cbc_free((bcal_cbc_ctx_t*)ctx);
+    free(ctx);
+}
