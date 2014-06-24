@@ -20,8 +20,29 @@
 #include "aes.h"
 #include "blockcipher_descriptor.h"
 #include "bcal_aes128.h"
+#include "bcal_aes256.h"
 #include "bcal-cbc.h"
 #include <avr/pgmspace.h>
+
+////////////////////////////////////////////////////////////////////////////////
+// AES-256
+////////////////////////////////////////////////////////////////////////////////
+
+// encrypt single 128bit block. data is assumed to be 16 uint8_t's
+// key and iv are assumed to be both 128bit thus 16 uint8_t's
+void aes128_enc_single(const uint8_t* key, void* data){
+    aes128_ctx_t ctx;
+    aes128_init(key, &ctx);
+    aes128_enc(data, &ctx);
+}
+
+// decrypt single 128bit block. data is assumed to be 16 uint8_t's
+// key is assumed to be 128bit thus 16 uint8_t's
+void aes128_dec_single(const uint8_t* key, void* data){
+    aes128_ctx_t ctx;
+    aes128_init(key, &ctx);
+    aes128_dec(data, &ctx);
+}
 
 // encrypt multiple blocks of 128bit data, data_len but be mod 16
 // key and iv are assumed to be both 128bit thus 16 uint8_t's
@@ -38,23 +59,6 @@ void aes128_cbc_enc(const uint8_t* key, const uint8_t* iv, void* data, const uin
 	bcal_cbc_encMsg(iv, data, data_len / 16, &ctx);
 	bcal_cbc_free(&ctx);
 }
-
-// encrypt single 128bit block. data is assumed to be 16 uint8_t's
-// key and iv are assumed to be both 128bit thus 16 uint8_t's
-void aes128_enc_single(const uint8_t* key, void* data){
-	aes128_ctx_t ctx;
-	aes128_init(key, &ctx);
-	aes128_enc(data, &ctx);
-}
-
-// encrypt single 128bit block. data is assumed to be 16 uint8_t's
-// key is assumed to be 256bit thus 32 uint8_t's
-void aes256_enc_single(const uint8_t* key, void* data){
-	aes256_ctx_t ctx;
-	aes256_init(key, &ctx);
-	aes256_enc(data, &ctx);
-}
-
 
 // prepare an encrypted to use for encrypting multiple blocks lateron.
 // key and iv are assumed to be both 128bit thus 16 uint8_t's
@@ -89,8 +93,6 @@ void aes128_cbc_enc_finish(const aes_context ctx){
 	free(ctx);
 }
 
-
-
 // decrypt multiple blocks of 128bit data, data_len but be mod 16
 // key and iv are assumed to be both 128bit thus 16 uint8_t's
 void aes128_cbc_dec(const uint8_t* key, const uint8_t* iv, void* data, const uint16_t data_len){
@@ -106,23 +108,6 @@ void aes128_cbc_dec(const uint8_t* key, const uint8_t* iv, void* data, const uin
 	bcal_cbc_decMsg(iv, data, data_len / 16, &ctx);
 	bcal_cbc_free(&ctx);
 }
-
-// decrypt single 128bit block. data is assumed to be 16 uint8_t's
-// key is assumed to be 128bit thus 16 uint8_t's
-void aes128_dec_single(const uint8_t* key, void* data){
-	aes128_ctx_t ctx;
-	aes128_init(key, &ctx);
-	aes128_dec(data, &ctx);
-}
-
-// decrypt single 128bit block. data is assumed to be 16 uint8_t's
-// key is assumed to be 256bit thus 32 uint8_t's
-void aes256_dec_single(const uint8_t* key, void* data){
-	aes256_ctx_t ctx;
-	aes256_init(key, &ctx);
-	aes256_dec(data, &ctx);
-}
-
 
 // prepare an decrypted to use for decrypting multiple blocks lateron.
 // key and iv are assumed to be both 128bit thus 16 uint8_t's
@@ -156,3 +141,24 @@ void aes128_cbc_dec_finish(const aes_context ctx){
 	bcal_cbc_free((bcal_cbc_ctx_t*)ctx);
 	free(ctx);
 }
+
+////////////////////////////////////////////////////////////////////////////////
+// AES-256
+////////////////////////////////////////////////////////////////////////////////
+
+// decrypt single 128bit block. data is assumed to be 16 uint8_t's
+// key is assumed to be 256bit thus 32 uint8_t's
+void aes256_dec_single(const uint8_t* key, void* data){
+    aes256_ctx_t ctx;
+    aes256_init(key, &ctx);
+    aes256_dec(data, &ctx);
+}
+
+// encrypt single 128bit block. data is assumed to be 16 uint8_t's
+// key is assumed to be 256bit thus 32 uint8_t's
+void aes256_enc_single(const uint8_t* key, void* data){
+    aes256_ctx_t ctx;
+    aes256_init(key, &ctx);
+    aes256_enc(data, &ctx);
+}
+
