@@ -21,9 +21,10 @@ Installation
 Usage
 -----
 
-At the moment only 128bit keys are supported, the blocksize is also fixed at 128bit.
-This means that the key array and possible iv array should contain exactly 16 bytes (`uint8_t` or `byte`).
-Moreover the amount of bytes to encrypt should be mod 16. 
+At the moment only 128bit and 256bit keys are supported, the blocksize is fixed
+at 128bit. This means that the key array should contain exactly 16 bytes
+(`uint8_t` or `byte`) or 32 bytes, respectively. The iv array should be exactly
+16 bytes long. Moreover the amount of bytes to encrypt should be mod 16. 
 (this means you have to take care of padding yourself).
 
 The library supports 3 kinds of operations.
@@ -37,6 +38,27 @@ The single block enc/decryption are the following methods:
 ```c
 void aes128_enc_single(const uint8_t* key, void* data);
 void aes128_dec_single(const uint8_t* key, void* data);
+void aes256_enc_single(const uint8_t* key, void* data);
+void aes256_dec_single(const uint8_t* key, void* data);
+```
+
+Methods for the CBC mode of operation (encryption):
+
+```c
+void aes128_cbc_enc(const uint8_t* key, const uint8_t* iv, void* data, const uint16_t data_len);
+aes_context aes128_cbc_enc_start(const uint8_t* key, const void* iv);
+aes_context aes256_cbc_enc_start(const uint8_t* key, const void* iv);
+void aes_cbc_enc_continue(const aes_context ctx, void* data, const uint16_t data_len);
+void aes_cbc_enc_finish(const aes_context ctx);
+```
+
+Methods for the CBC mode of operation (decryption). Right now, only 128bit is
+supported:
+
+```c
+aes_context aes128_cbc_dec_start(const uint8_t* key, const void* iv);
+void aes128_cbc_dec_continue(const aes_context ctx, void* data, const uint16_t data_len);
+void aes128_cbc_dec_finish(const aes_context ctx);
 ```
 
 Usage example:
@@ -67,5 +89,18 @@ Serial.print("decrypted:");
 Serial.println(data);
 ```
 
+Usage example for AES256-CBC:
 
+```c
+uint8_t key[] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31};
+uint8_t iv[] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
+char data[] = "0123456789012345ABCDEF6789012345";
+aes_context ctx;
 
+Serial.begin(57600);
+ctx = aes256_cbc_enc_start(key, iv);
+aes_cbc_enc_continue(ctx, data, 32);
+aes_cbc_enc_finish(ctx);
+Serial.print("encrypted-cbc:");
+Serial.println(data);
+```
